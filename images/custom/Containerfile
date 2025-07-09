@@ -106,7 +106,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # apps.json includes
-ARG APPS_JSON_BASE64
+ARG APPS_JSON_BASE64=WwogIHsKICAgICJ1cmwiOiAiaHR0cHM6Ly9naXRodWIuY29tL3N1bWVyeWFuL2ZyYXBwZV9hcnRlcmlzX2FwcC5naXQiLAogICAgImJyYW5jaCI6ICJkZXZlbG9wIgogIH0KXQo=
 RUN if [ -n "${APPS_JSON_BASE64}" ]; then \
     mkdir /opt/frappe && echo "${APPS_JSON_BASE64}" | base64 -d > /opt/frappe/apps.json; \
   fi
