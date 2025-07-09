@@ -143,6 +143,27 @@ USER frappe
 
 COPY --from=builder --chown=frappe:frappe /home/frappe/frappe-bench /home/frappe/frappe-bench
 
+# Script para instalar apps customizadas no startup
+COPY --chown=frappe:frappe <<EOF /home/frappe/install-custom-apps.sh
+#!/bin/bash
+set -e
+
+# Verificar se a app já está instalada
+if [ ! -d "/home/frappe/frappe-bench/apps/frappe_arteris_app" ]; then
+    echo "Instalando frappe_arteris_app..."
+    cd /home/frappe/frappe-bench
+    bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git
+    echo "frappe_arteris_app instalada com sucesso!"
+else
+    echo "frappe_arteris_app já está instalada."
+fi
+
+# Executar comando original
+exec "\$@"
+EOF
+
+RUN chmod +x /home/frappe/install-custom-apps.sh
+
 WORKDIR /home/frappe/frappe-bench
 
 VOLUME [ \
