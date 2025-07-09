@@ -37,6 +37,11 @@ RUN useradd -ms /bin/bash frappe \
     # For healthcheck
     wait-for-it \
     jq \
+    # Build essentials needed for frappe
+    pkg-config \
+    python3-dev \
+    build-essential \
+    gcc \    
     # NodeJS
     && mkdir -p ${NVM_DIR} \
     && curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.5/install.sh | bash \
@@ -103,8 +108,9 @@ RUN apt-get update \
     gcc \
     build-essential \
     libbz2-dev \
-    && rm -rf /var/lib/apt/lists/*
-
+    # Additional packages that may be needed
+    python3-dev 
+    # \ # && rm -rf /var/lib/apt/lists/*
 # apps.json includes
 ARG APPS_JSON_BASE64=WwogIHsKICAgICJ1cmwiOiAiaHR0cHM6Ly9naXRodWIuY29tL3N1bWVyeWFuL2ZyYXBwZV9hcnRlcmlzX2FwcC5naXQiLAogICAgImJyYW5jaCI6ICJkZXZlbG9wIgogIH0KXQo=
 RUN if [ -n "${APPS_JSON_BASE64}" ]; then \
@@ -129,8 +135,7 @@ RUN export APP_INSTALL_ARGS="" && \
     /home/frappe/frappe-bench && \
   cd /home/frappe/frappe-bench && \
   echo "{}" > sites/common_site_config.json 
-  # && \
-  # find apps -mindepth 1 -path "*/.git" | xargs rm -fr
+  # && \ # find apps -mindepth 1 -path "*/.git" | xargs rm -fr
 
 FROM base AS backend
 
