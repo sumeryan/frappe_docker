@@ -102,6 +102,10 @@ services:
       UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
+      # Configuração SSL
+      ENABLE_SSL: "true"
+      SSL_CERTIFICATE: /etc/ssl/certs/custom/cert_arteris_com_br.pem
+      SSL_CERTIFICATE_KEY: /etc/ssl/certs/custom/key_arteris_com_br.pem
     image: arteris-msi:1.0.0
     networks:
       default: null
@@ -110,8 +114,12 @@ services:
     restart: unless-stopped
     ports:
       - mode: ingress
-        target: 8080
+        target: 80
         published: "80"
+        protocol: tcp
+      - mode: ingress
+        target: 443
+        published: "443"
         protocol: tcp
     volumes:
       - type: volume
@@ -125,6 +133,9 @@ services:
       - type: bind
         source: ./ssl-certs
         target: /etc/ssl/certs/custom
+      - type: bind
+        source: ./nginx-ssl.conf
+        target: /etc/nginx/conf.d/ssl.conf
   queue-long:
     command:
       - bench
@@ -248,21 +259,3 @@ volumes:
     name: msi_redis-queue-data
   sites:
     name: msi_sites
-x-backend-defaults:
-  depends_on:
-    configurator:
-      condition: service_completed_successfully
-  image: arteris-msi:1.0.0
-  pull_policy: if_not_present
-  restart: unless-stopped
-  volumes:
-    - sites:/home/frappe/frappe-bench/sites
-    - apps:/home/frappe/frappe-bench/apps
-x-customizable-image:
-  image: arteris-msi:1.0.0
-  pull_policy: if_not_present
-  restart: unless-stopped
-x-depends-on-configurator:
-  depends_on:
-    configurator:
-      condition: service_completed_successfully
