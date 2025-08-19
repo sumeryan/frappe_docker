@@ -20,6 +20,10 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
+      - type: volume
+        source: ssl-certs
+        target: /etc/ssl/certs/custom
+        volume: {}
   configurator:
     command:
       - |
@@ -119,6 +123,10 @@ services:
       - type: volume
         source: apps
         target: /home/frappe/frappe-bench/apps
+        volume: {}
+      - type: volume
+        source: ssl-certs
+        target: /etc/ssl/certs/custom
         volume: {}
   proxy:
     command:
@@ -275,6 +283,8 @@ volumes:
     name: msi_apps
   cert-data:
     name: msi_cert-data
+  ssl-certs:
+    name: msi_ssl-certs
   db-data:
     name: msi_db-data
   redis-queue-data:
