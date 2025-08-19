@@ -20,10 +20,9 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-      - type: volume
-        source: ssl-certs
+      - type: bind
+        source: ./ssl-certs
         target: /etc/ssl/certs/custom
-        volume: {}
   configurator:
     command:
       - |
@@ -107,8 +106,8 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.frontend-http.entrypoints: websecure
-      traefik.http.routers.frontend-http.rule: Host(`arteris.eastus2.cloudapp.azure.com`)
-      traefik.http.routers.frontend-http.tls.certresolver: main-resolver
+      traefik.http.routers.frontend-http.rule: Host(`msi.arteris.com.br`)
+      traefik.http.routers.frontend-http.tls: "true"
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
     networks:
       default: null
@@ -124,10 +123,9 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-      - type: volume
-        source: ssl-certs
+      - type: bind
+        source: ./ssl-certs
         target: /etc/ssl/certs/custom
-        volume: {}
   proxy:
     command:
       - --providers.docker=true
@@ -136,18 +134,16 @@ services:
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.websecure.address=:443
-      - --certificatesResolvers.main-resolver.acme.httpChallenge=true
-      - --certificatesResolvers.main-resolver.acme.httpChallenge.entrypoint=web
-      - --certificatesResolvers.main-resolver.acme.email=infra@arteris.com.br
-      - --certificatesResolvers.main-resolver.acme.storage=/letsencrypt/acme.json
+      - --providers.file.directory=/ssl-config
+      - --providers.file.watch=true
     image: traefik:v2.11
     networks:
       default: null
     ports:
-      - mode: ingress
-        target: 80
-        published: "80"
-        protocol: tcp
+      # - mode: ingress
+      #   target: 80
+      #   published: "80"
+      #   protocol: tcp
       - mode: ingress
         target: 443
         published: "443"
@@ -158,6 +154,9 @@ services:
         source: cert-data
         target: /letsencrypt
         volume: {}
+      - type: bind
+        source: ./ssl-certs
+        target: /ssl-config
       - type: bind
         source: /var/run/docker.sock
         target: /var/run/docker.sock
@@ -283,8 +282,6 @@ volumes:
     name: msi_apps
   cert-data:
     name: msi_cert-data
-  ssl-certs:
-    name: msi_ssl-certs
   db-data:
     name: msi_db-data
   redis-queue-data:

@@ -1,0 +1,11 @@
+tls:
+  certificates:
+    - certFile: /ssl-config/cert_arteris_com_br.pem
+      keyFile: /ssl-config/key_arteris_com_br.pem
+      stores:
+        - default
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /ssl-config/cert_arteris_com_br.pem
+        keyFile: /ssl-config/key_arteris_com_br.pem
