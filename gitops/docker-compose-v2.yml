@@ -20,6 +20,9 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
+      - type: bind
+        source: ./ssl-certs
+        target: /etc/ssl/certs/custom
   configurator:
     command:
       - |
@@ -103,7 +106,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.frontend-http.entrypoints: websecure
-      traefik.http.routers.frontend-http.rule: Host(`arteris.eastus2.cloudapp.azure.com`)
+      traefik.http.routers.frontend-http.rule: Host(`{FRAPPE_SITE_NAME}`)
       traefik.http.routers.frontend-http.tls.certresolver: main-resolver
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
     networks:
@@ -120,6 +123,9 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
+      - type: bind
+        source: ./ssl-certs
+        target: /etc/ssl/certs/custom
   proxy:
     command:
       - --providers.docker=true
