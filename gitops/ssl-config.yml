@@ -1,11 +1,11 @@
 tls:
   certificates:
-    - certFile: /ssl-config/cert_arteris_com_br.pem
-      keyFile: /ssl-config/key_arteris_com_br.pem
+    - certFile: /ssl-config/{SSL_CERTIFICATE}
+      keyFile: /ssl-config/{SSL_KEY}
       stores:
         - default
   stores:
     default:
       defaultCertificate:
-        certFile: /ssl-config/cert_arteris_com_br.pem
-        keyFile: /ssl-config/key_arteris_com_br.pem
+        certFile: /ssl-config/{SSL_CERTIFICATE}
+        keyFile: /ssl-config/{SSL_KEY}

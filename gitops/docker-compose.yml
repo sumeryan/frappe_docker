@@ -67,11 +67,11 @@ services:
       - --collation-server=utf8mb4_unicode_ci
       - --skip-character-set-client-handshake
     environment:
-      MYSQL_ROOT_PASSWORD: BtQEprm1Re5QDjY
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     healthcheck:
       test:
         - CMD-SHELL
-        - mariadb-admin ping -h localhost --password=BtQEprm1Re5QDjY
+        - mariadb-admin ping -h localhost --password=${MYSQL_ROOT_PASSWORD}
       interval: 1s
       retries: 20
     image: mariadb:11.7
@@ -106,7 +106,7 @@ services:
     labels:
       traefik.enable: "true"
       traefik.http.routers.frontend-http.entrypoints: websecure
-      traefik.http.routers.frontend-http.rule: Host(`msi.arteris.com.br`)
+      traefik.http.routers.frontend-http.rule: Host(`{FRAPPE_SITE_NAME}`)
       traefik.http.routers.frontend-http.tls: "true"
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
     networks:
