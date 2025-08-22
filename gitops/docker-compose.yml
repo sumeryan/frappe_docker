@@ -20,6 +20,9 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
+      - type: bind
+        source: ./ssl-certs
+        target: /etc/nginx/conf.d/ssl
   configurator:
     command:
       - |
@@ -120,6 +123,9 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
+      - type: bind
+        source: ./ssl-certs
+        target: /etc/nginx/conf.d/ssl
   proxy:
     command:
       - --providers.docker=true
