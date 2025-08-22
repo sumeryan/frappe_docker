@@ -66,9 +66,9 @@ echo "⏳ Este processo pode demorar alguns minutos..."
 # Executar restore (arquivos via bind mount)
 if docker exec -w /home/frappe/frappe-bench "$CONTAINER_NAME" \
     bench --site "$SITE_NAME" restore \
+        "/tmp/backup/$DATABASE" \
         --with-private-files "/tmp/backup/$PRIVATE_FILES" \
-        --with-public-files "/tmp/backup/$PUBLIC_FILES" \
-        --backup-file-path "/tmp/backup/$DATABASE"; then
+        --with-public-files "/tmp/backup/$PUBLIC_FILES"; then
     
     echo
     echo "✅ Restore concluído com sucesso!"
