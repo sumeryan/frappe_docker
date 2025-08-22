@@ -12,7 +12,7 @@ echo "Container: $CONTAINER_NAME"
 echo
 
 # Navegar para o diretório de backup
-cd ~/frappe_docker/gitops/backup/ || exit 1
+cd /home/azureuser/frappe_docker/gitops/backup/ || exit 1
 
 # Verificar se existem arquivos de backup
 if [ ! "$(ls -A .)" ]; then

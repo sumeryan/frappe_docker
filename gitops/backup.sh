@@ -64,7 +64,7 @@ echo
 
 # Verificar arquivos criados
 echo "📋 Verificando arquivos de backup criados..."
-cd ~/frappe_docker/gitops/backup/ || exit 1
+cd /home/azureuser/frappe_docker/gitops/backup/ || exit 1
 
 LATEST_FILES=$(find . -name "*$(date +%Y%m%d)*" -type f 2>/dev/null | wc -l)
 if [ "$LATEST_FILES" -gt 0 ]; then
