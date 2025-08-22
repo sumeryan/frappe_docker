@@ -3,7 +3,7 @@
 # Script para restaurar o backup mais recente no Frappe
 
 SITE_NAME="msi.arteris.com.br"
-BACKUP_DIR="~/frappe_docker/gitops/backup"
+BACKUP_DIR="/home/azureuser/frappe_docker/gitops/backup"
 CONTAINER_NAME="msi-backend-1"
 
 echo "=== Frappe Restore Script ==="

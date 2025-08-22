@@ -3,7 +3,7 @@
 # Script para fazer backup do site msi.arteris.com.br
 SITE_NAME="msi.arteris.com.br"
 RETENTION_DAYS=${1:-7}
-BACKUP_DIR="~/frappe_docker/gitops/backup"
+BACKUP_DIR="/home/azureuser/frappe_docker/gitops/backup"
 CONTAINER_NAME="msi-backend-1"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 
