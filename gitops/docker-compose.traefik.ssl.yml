@@ -25,7 +25,7 @@ services:
         target: /etc/nginx/conf.d/ssl
       - type: bind
         source: ./backup
-        target: /home/frappe-bench/backup
+        target: /tmp/backup
   configurator:
     command:
       - |
