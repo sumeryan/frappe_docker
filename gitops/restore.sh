@@ -68,7 +68,9 @@ if docker exec -w /home/frappe/frappe-bench "$CONTAINER_NAME" \
     bench --site "$SITE_NAME" restore \
         "/tmp/backup/$DATABASE" \
         --with-private-files "/tmp/backup/$PRIVATE_FILES" \
-        --with-public-files "/tmp/backup/$PUBLIC_FILES"; then
+        --with-public-files "/tmp/backup/$PUBLIC_FILES"
+        --db-root-username root
+        --db-root-password BtQEprm1Re5QDjY; then
     
     echo
     echo "✅ Restore concluído com sucesso!"
