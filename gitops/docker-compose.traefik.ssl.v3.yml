@@ -340,8 +340,9 @@ services:
         required: true
     environment:
       FRAPPE_SITE_NAME_HEADER: msi.arteris.com.br
-      ORIGIN: https://msi.arteris.com.br
-      FRAPPE_SOCKETIO_CORS_ALLOWED_ORIGINS: "*"
+      SOCKETIO_CORS_ORIGINS: "*"
+      CORS_ORIGINS: "*" 
+      ALLOWED_ORIGINS: "*"
     labels:
       traefik.enable: "true"
       traefik.http.services.websocket.loadbalancer.server.port: "9000"
