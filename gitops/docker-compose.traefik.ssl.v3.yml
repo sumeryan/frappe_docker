@@ -338,6 +338,12 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
+    labels:
+      traefik.enable: "true"
+      traefik.http.services.websocket.loadbalancer.server.port: "9000"
+      traefik.http.routers.websocket.rule: Host(`msi.arteris.com.br`) && PathPrefix(`/socket.io/`)
+      traefik.http.routers.websocket.entrypoints: websecure
+      traefik.http.routers.websocket.tls: "true"        
     image: arteris-msi:1.0.0
     networks:
       default: null
