@@ -148,19 +148,36 @@ services:
       traefik.http.middlewares.security-headers.headers.customResponseHeaders.Server: ""
       traefik.http.middlewares.security-headers.headers.customResponseHeaders.X-Powered-By: ""
       
-      # CSP RIGOROSO - SOLUÇÃO PARA PROBLEMAS 1, 2 e 4
-      traefik.http.middlewares.strict-csp.headers.contentSecurityPolicy: >-
+      # CSP RIGOROSO
+      # traefik.http.middlewares.strict-csp.headers.contentSecurityPolicy: >-
+      #   default-src 'self';
+      #   script-src 'self' https://cdnjs.cloudflare.com;
+      #   style-src 'self' https://cdnjs.cloudflare.com;
+      #   img-src 'self' data: blob: https:;
+      #   font-src 'self' data: https://cdnjs.cloudflare.com;
+      #   connect-src 'self' wss: ws:;
+      #   frame-ancestors 'self';
+      #   base-uri 'self';
+      #   form-action 'self';
+      #   object-src 'none';
+      #   upgrade-insecure-requests;
+      # CSP BALANCEADO
+      traefik.http.middlewares.balanced-csp.headers.contentSecurityPolicy: >-
         default-src 'self';
-        script-src 'self' https://cdnjs.cloudflare.com;
-        style-src 'self' https://cdnjs.cloudflare.com;
-        img-src 'self' data: blob: https:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com data:;
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com data:;
+        img-src 'self' data: blob: https: http:;
         font-src 'self' data: https://cdnjs.cloudflare.com;
-        connect-src 'self' wss: ws:;
+        connect-src 'self' wss: ws: https: http:;
+        media-src 'self' data: blob:;
+        object-src 'none';
+        frame-src 'self';
+        worker-src 'self' blob:;
+        child-src 'self' blob:;
         frame-ancestors 'self';
         base-uri 'self';
         form-action 'self';
-        object-src 'none';
-        upgrade-insecure-requests;
+        upgrade-insecure-requests;      
       
       # Rate limiting
       traefik.http.middlewares.rate-limit.ratelimit.average: 100
