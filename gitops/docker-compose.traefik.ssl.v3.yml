@@ -86,6 +86,7 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
+      DB_ROOT_PASSWORD: BtQEprm1Re5QDjY
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
@@ -348,15 +349,15 @@ services:
       FRAPPE_SITE_NAME_HEADER: msi.arteris.com.br
       SITE_NAME: msi.arteris.com.br
       ALLOWED_ORIGINS: "https://msi.arteris.com.br"
-    labels:
-      traefik.enable: "true"
-      traefik.http.services.websocket.loadbalancer.server.port: "9000"
-      traefik.http.routers.websocket.rule: Host(`msi.arteris.com.br`) && PathPrefix(`/socket.io/`)
-      traefik.http.routers.websocket.entrypoints: websecure
-      traefik.http.routers.websocket.tls: "true"
-      traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Origin: "https://msi.arteris.com.br"
-      traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Host: "msi.arteris.com.br"
-      traefik.http.routers.websocket.middlewares: websocket-cors        
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.http.services.websocket.loadbalancer.server.port: "9000"
+    #   traefik.http.routers.websocket.rule: Host(`msi.arteris.com.br`) && PathPrefix(`/socket.io/`)
+    #   traefik.http.routers.websocket.entrypoints: websecure
+    #   traefik.http.routers.websocket.tls: "true"      
+    #   traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Origin: "https://msi.arteris.com.br"
+    #   traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Host: "msi.arteris.com.br"
+    #   traefik.http.routers.websocket.middlewares: websocket-cors        
     image: arteris-msi:1.0.0
     networks:
       default: null
