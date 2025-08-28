@@ -40,13 +40,13 @@ services:
         # CONFIGURAÇÕES COMPLETAS DE COOKIES SEGUROS
         bench set-config -g secure_cookies 1;
         bench set-config -g use_ssl 1;
-        bench set-config -g cookie_secure 1;
-        bench set-config -g session_cookie_secure 1;
-        bench set-config -g session_cookie_httponly 1;
-        bench set-config -g csrf_cookie_secure 1;
-        bench set-config -g csrf_cookie_httponly 1;
-        bench set-config -g session_cookie_samesite "Strict";
-        bench set-config -g csrf_cookie_samesite "Strict";
+      # bench set-config -g cookie_secure 1;
+      # bench set-config -g session_cookie_secure 1;
+      # bench set-config -g session_cookie_httponly 1;
+      # bench set-config -g csrf_cookie_secure 1;
+      # bench set-config -g csrf_cookie_httponly 1;
+      # bench set-config -g session_cookie_samesite "Strict";
+      # bench set-config -g csrf_cookie_samesite "Strict";
     depends_on:
       db:
         condition: service_healthy
@@ -144,7 +144,7 @@ services:
       traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains: true
       traefik.http.middlewares.security-headers.headers.stsPreload: true
       traefik.http.middlewares.security-headers.headers.forceSTSHeader: true
-      traefik.http.middlewares.security-headers.headers.referrerPolicy: strict-origin-when-cross-origin
+      traefik.http.middlewares.security-headers.headers.referrerPolicy: same-origin # strict-origin-when-cross-origin
       traefik.http.middlewares.security-headers.headers.customResponseHeaders.Server: ""
       traefik.http.middlewares.security-headers.headers.customResponseHeaders.X-Powered-By: ""
       
