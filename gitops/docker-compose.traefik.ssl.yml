@@ -114,6 +114,9 @@ services:
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
       NGINX_SERVER_TOKENS: "off"  # Ocultar versão do nginx
+      NGINX_PROXY_COOKIE_FLAGS: "HttpOnly Secure SameSite=Strict"
+      NGINX_ADD_HEADERS: |
+        add_header Set-Cookie "HttpOnly; Secure; SameSite=Strict" always;      
     image: arteris-msi:1.0.0
     labels:
       traefik.enable: "true"
@@ -122,7 +125,7 @@ services:
       traefik.http.routers.frontend-http.tls: "true"
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
       # Middlewares de segurança
-      traefik.http.routers.frontend-http.middlewares: security-headers@docker,content-security-policy@docker,rate-limit@docker
+      traefik.http.routers.frontend-http.middlewares: security-headers@docker,content-security-policy@docker,rate-limit@docker,secure-cookies@docker           
       # Headers de segurança
       traefik.http.middlewares.security-headers.headers.customFrameOptionsValue: SAMEORIGIN
       traefik.http.middlewares.security-headers.headers.contentTypeNosniff: true
@@ -148,6 +151,8 @@ services:
       traefik.http.middlewares.rate-limit.ratelimit.burst: 50
       # Remover header do servidor
       traefik.http.middlewares.security-headers.headers.customResponseHeaders.Server: ""
+      # Middleware para cookies seguros
+      traefik.http.middlewares.secure-cookies.headers.customResponseHeaders.Set-Cookie: "HttpOnly; Secure; SameSite=Strict"      
     networks:
       default: null
     platform: linux/amd64
