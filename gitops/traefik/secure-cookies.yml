@@ -1,0 +1,9 @@
+# ./traefik/secure-cookies.yml
+http:
+  middlewares:
+    secure-cookies:
+      headers:
+        customResponseHeaders:
+          # Força todos os Set-Cookie a incluir flags de segurança
+          Set-Cookie: |
+            HttpOnly; Secure; SameSite=Strict
