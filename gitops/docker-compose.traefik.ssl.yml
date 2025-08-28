@@ -94,7 +94,6 @@ services:
         source: db-data
         target: /var/lib/mysql
         volume: {}
-services:
   frontend:
     command:
       - nginx-entrypoint.sh
