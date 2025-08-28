@@ -338,6 +338,9 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
+    environment:
+      FRAPPE_SITE_NAME_HEADER: msi.arteris.com.br
+      ORIGIN: https://msi.arteris.com.br        
     labels:
       traefik.enable: "true"
       traefik.http.services.websocket.loadbalancer.server.port: "9000"
