@@ -29,7 +29,15 @@ services:
   configurator:
     command:
       - |
-        ls -1 apps > sites/apps.txt; bench set-config -g db_host $$DB_HOST; bench set-config -gp db_port $$DB_PORT; bench set-config -g redis_cache "redis://$$REDIS_CACHE"; bench set-config -g redis_queue "redis://$$REDIS_QUEUE"; bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"; bench set-config -gp socketio_port $$SOCKETIO_PORT;
+        ls -1 apps > sites/apps.txt; 
+        bench set-config -g db_host $$DB_HOST; 
+        bench set-config -gp db_port $$DB_PORT; 
+        bench set-config -g redis_cache "redis://$$REDIS_CACHE"; 
+        bench set-config -g redis_queue "redis://$$REDIS_QUEUE"; 
+        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"; 
+        bench set-config -gp socketio_port $$SOCKETIO_PORT;
+        bench set-config -g secure_cookies 1;
+        bench set-config -g use_ssl 1;       
     depends_on:
       db:
         condition: service_healthy
@@ -105,6 +113,7 @@ services:
       UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
+      NGINX_SERVER_TOKENS: "off"  # Ocultar versão do nginx
     image: arteris-msi:1.0.0
     labels:
       traefik.enable: "true"
@@ -112,6 +121,33 @@ services:
       traefik.http.routers.frontend-http.rule: Host(`msi.arteris.com.br`)
       traefik.http.routers.frontend-http.tls: "true"
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
+      # Middlewares de segurança
+      traefik.http.routers.frontend-http.middlewares: security-headers@docker,content-security-policy@docker,rate-limit@docker
+      # Headers de segurança
+      traefik.http.middlewares.security-headers.headers.customFrameOptionsValue: SAMEORIGIN
+      traefik.http.middlewares.security-headers.headers.contentTypeNosniff: true
+      traefik.http.middlewares.security-headers.headers.browserXssFilter: false  # Desabilitado conforme recomendação
+      traefik.http.middlewares.security-headers.headers.stsSeconds: 63072000
+      traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains: true
+      traefik.http.middlewares.security-headers.headers.stsPreload: true
+      traefik.http.middlewares.security-headers.headers.forceSTSHeader: true
+      traefik.http.middlewares.security-headers.headers.referrerPolicy: same-origin
+      # Content Security Policy
+      traefik.http.middlewares.content-security-policy.headers.contentSecurityPolicy: |
+        default-src 'self';
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: blob:;
+        font-src 'self' data:;
+        connect-src 'self';
+        frame-ancestors 'self';
+        base-uri 'self';
+        form-action 'self'            
+        # Rate limiting para proteção contra ataques
+      traefik.http.middlewares.rate-limit.ratelimit.average: 100
+      traefik.http.middlewares.rate-limit.ratelimit.burst: 50
+      # Remover header do servidor
+      traefik.http.middlewares.security-headers.headers.customResponseHeaders.Server: ""
     networks:
       default: null
     platform: linux/amd64
@@ -135,10 +171,14 @@ services:
       - --providers.docker.exposedbydefault=false
       - --providers.file.directory=/etc/traefik/dynamic
       - --providers.file.watch=true
-      - --entrypoints.web.address=:80
+      #- --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.websecure.address=:443
+      # Configuração global de TLS
+      - --entrypoints.websecure.http.tls=true
+      - --entrypoints.websecure.http.tls.options=default
+      - --providers.file.filename=/etc/traefik/traefik-tls.yml      
     image: traefik:v2.11
     networks:
       default: null
@@ -165,6 +205,9 @@ services:
       - type: bind
         source: ./traefik
         target: /etc/traefik/dynamic
+      - type: bind
+        source: ./traefik-tls.yml
+        target: /etc/traefik/traefik-tls.yml        
   queue-long:
     command:
       - bench
