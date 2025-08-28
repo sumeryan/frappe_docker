@@ -148,7 +148,7 @@ services:
       traefik.http.routers.frontend-http.tls: "true"
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
       # Middlewares completos
-      traefik.http.routers.frontend-http.middlewares: complete-security@docker,rate-limit@docker
+      traefik.http.routers.frontend-http.middlewares: complete-security@docker #,rate-limit@docker
       
       # HEADERS DE SEGURANÇA COMPLETOS
       traefik.http.middlewares.complete-security.headers.customFrameOptionsValue: DENY
@@ -180,8 +180,8 @@ services:
         object-src 'none';
         upgrade-insecure-requests;
       # Rate limiting
-      traefik.http.middlewares.rate-limit.ratelimit.average: 10
-      traefik.http.middlewares.rate-limit.ratelimit.burst: 20
+      traefik.http.middlewares.rate-limit.ratelimit.average: 100
+      traefik.http.middlewares.rate-limit.ratelimit.burst: 200
     networks:
       default: null
     platform: linux/amd64
