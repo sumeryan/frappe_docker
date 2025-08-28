@@ -1,8 +1,8 @@
 http:
   middlewares:
-    secure-cookies:
+    cookie-security:
       plugin:
-        rewriteResponse:
+        rewriteResponseHeaders:
           rewrites:
             - header: "Set-Cookie"
               regex: "^(.*)$"
