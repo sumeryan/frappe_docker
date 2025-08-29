@@ -32,8 +32,8 @@ services:
         ls -1 apps > sites/apps.txt;
         
         # Copiar arquivos customizados
-        cp -f /tmp/custom-files/app.py apps/frappe/frappe/app.py;
-        cp -f /tmp/custom-files/login.html apps/frappe/frappe/www/login.html;
+        # cp -f /tmp/custom-files/app.py apps/frappe/frappe/app.py;
+        # cp -f /tmp/custom-files/login.html apps/frappe/frappe/www/login.html;
         
         # Criar site se necessário
         # if [ ! -d "sites/msi.arteris.com.br" ]; then
