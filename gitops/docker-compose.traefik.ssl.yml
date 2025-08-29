@@ -26,27 +26,54 @@ services:
       - type: bind
         source: ./backup
         target: /tmp/backup
-
   configurator:
     command:
       - |
-        ls -1 apps > sites/apps.txt; 
+        ls -1 apps > sites/apps.txt;
+        
+        # Copiar arquivos customizados
+        cp -f tmp/custom-files/app.py apps/frappe/frappe/app.py;
+        cp -f /tmp/custom-files/login.html apps/frappe/frappe/www/login.html;
+        
+        # Criar site se necessário
+        # if [ ! -d "sites/msi.arteris.com.br" ]; then
+        #  bench new-site msi.arteris.com.br --db-root-password=$$DB_ROOT_PASSWORD --admin-password=admin --no-mariadb-socket
+        # fi
+        # echo "msi.arteris.com.br" > sites/currentsite.txt;
+        
+        # Configurações básicas
         bench set-config -g db_host $$DB_HOST; 
         bench set-config -gp db_port $$DB_PORT; 
         bench set-config -g redis_cache "redis://$$REDIS_CACHE"; 
         bench set-config -g redis_queue "redis://$$REDIS_QUEUE"; 
         bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"; 
         bench set-config -gp socketio_port $$SOCKETIO_PORT;
-        # CONFIGURAÇÕES COMPLETAS DE COOKIES SEGUROS
+        
+        # CONFIGURAÇÕES DE SEGURANÇA CRÍTICAS
         bench set-config -g secure_cookies 1;
         bench set-config -g use_ssl 1;
-      # bench set-config -g cookie_secure 1;
-      # bench set-config -g session_cookie_secure 1;
-      # bench set-config -g session_cookie_httponly 1;
-      # bench set-config -g csrf_cookie_secure 1;
-      # bench set-config -g csrf_cookie_httponly 1;
-      # bench set-config -g session_cookie_samesite "Strict";
-      # bench set-config -g csrf_cookie_samesite "Strict";
+        bench set-config -g force_https 1;
+        bench set-config -g cookie_secure 1;
+        bench set-config -g session_cookie_secure 1;
+        bench set-config -g session_cookie_httponly 1;
+        bench set-config -g csrf_cookie_secure 1;
+        bench set-config -g csrf_cookie_httponly 1;
+        bench set-config -g session_cookie_samesite "Strict";
+        bench set-config -g csrf_cookie_samesite "Strict";
+        
+        # Configurações anti-disclosure
+        bench set-config -g developer_mode 0;
+        bench set-config -g server_script_enabled 0;
+        bench set-config -g hide_footer 1;
+        bench set-config -g disable_signup 1;
+        bench set-config -g login_with_email_link 0;
+
+        # CONFIGURAÇÃO CRÍTICA DO SOCKETIO
+        bench set-config -g socketio_default_port 9000;
+        bench --site msi.arteris.com.br set-config socketio_port 9000;
+        bench --site msi.arteris.com.br set-config allow_cors "*";
+        bench --site msi.arteris.com.br set-config cors_allowed_origins "https://msi.arteris.com.br";        
+
     depends_on:
       db:
         condition: service_healthy
@@ -63,6 +90,7 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
+      DB_ROOT_PASSWORD: BtQEprm1Re5QDjY
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
@@ -81,7 +109,12 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-
+      - type: bind
+        source: ./frappe/app.py
+        target: /tmp/custom-files/app.py
+      - type: bind
+        source: ./frappe/login.html
+        target: /tmp/custom-files/login.html
   db:
     command:
       - --character-set-server=utf8mb4
@@ -104,7 +137,6 @@ services:
         source: db-data
         target: /var/lib/mysql
         volume: {}
-
   frontend:
     command:
       - nginx-entrypoint.sh
@@ -124,7 +156,7 @@ services:
       UPSTREAM_REAL_IP_ADDRESS: 127.0.0.1
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
-      NGINX_SERVER_TOKENS: "off"
+      NGINX_SERVER_TOKENS: "off"  # Ocultar versão do nginx
     image: arteris-msi:1.0.0
     labels:
       traefik.enable: "true"
@@ -132,57 +164,41 @@ services:
       traefik.http.routers.frontend-http.rule: Host(`msi.arteris.com.br`)
       traefik.http.routers.frontend-http.tls: "true"
       traefik.http.services.frontend.loadbalancer.server.port: "8080"
+      # Middlewares completos
+      traefik.http.routers.frontend-http.middlewares: complete-security@docker #,rate-limit@docker
       
-      # Middlewares de segurança (ordem corrigida)
-      traefik.http.routers.frontend-http.middlewares: security-headers@docker,strict-csp@docker,rate-limit@docker
+      # HEADERS DE SEGURANÇA COMPLETOS
+      traefik.http.middlewares.complete-security.headers.customFrameOptionsValue: DENY
+      traefik.http.middlewares.complete-security.headers.contentTypeNosniff: true
+      traefik.http.middlewares.complete-security.headers.browserXssFilter: true
+      traefik.http.middlewares.complete-security.headers.stsSeconds: 31536000
+      traefik.http.middlewares.complete-security.headers.stsIncludeSubdomains: true
+      traefik.http.middlewares.complete-security.headers.stsPreload: true
+      traefik.http.middlewares.complete-security.headers.forceSTSHeader: true
+      traefik.http.middlewares.complete-security.headers.referrerPolicy: strict-origin-when-cross-origin
       
-      # Headers de segurança básicos
-      traefik.http.middlewares.security-headers.headers.customFrameOptionsValue: SAMEORIGIN
-      traefik.http.middlewares.security-headers.headers.contentTypeNosniff: true
-      traefik.http.middlewares.security-headers.headers.browserXssFilter: false
-      traefik.http.middlewares.security-headers.headers.stsSeconds: 63072000
-      traefik.http.middlewares.security-headers.headers.stsIncludeSubdomains: true
-      traefik.http.middlewares.security-headers.headers.stsPreload: true
-      traefik.http.middlewares.security-headers.headers.forceSTSHeader: true
-      traefik.http.middlewares.security-headers.headers.referrerPolicy: same-origin # strict-origin-when-cross-origin
-      traefik.http.middlewares.security-headers.headers.customResponseHeaders.Server: ""
-      traefik.http.middlewares.security-headers.headers.customResponseHeaders.X-Powered-By: ""
+      # Headers customizados para resolver problemas específicos
+      traefik.http.middlewares.complete-security.headers.customResponseHeaders.Server: ""
+      traefik.http.middlewares.complete-security.headers.customResponseHeaders.X-Powered-By: ""
+      traefik.http.middlewares.complete-security.headers.customResponseHeaders.X-Content-Type-Options: nosniff
+      traefik.http.middlewares.complete-security.headers.customResponseHeaders.X-XSS-Protection: "1; mode=block"
       
-      # CSP RIGOROSO
-      # traefik.http.middlewares.strict-csp.headers.contentSecurityPolicy: >-
-      #   default-src 'self';
-      #   script-src 'self' https://cdnjs.cloudflare.com;
-      #   style-src 'self' https://cdnjs.cloudflare.com;
-      #   img-src 'self' data: blob: https:;
-      #   font-src 'self' data: https://cdnjs.cloudflare.com;
-      #   connect-src 'self' wss: ws:;
-      #   frame-ancestors 'self';
-      #   base-uri 'self';
-      #   form-action 'self';
-      #   object-src 'none';
-      #   upgrade-insecure-requests;
-      # CSP BALANCEADO
-      traefik.http.middlewares.balanced-csp.headers.contentSecurityPolicy: >-
+      # CSP rigoroso mas funcional
+      traefik.http.middlewares.complete-security.headers.contentSecurityPolicy: >-
         default-src 'self';
-        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com data:;
-        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com data:;
-        img-src 'self' data: blob: https: http:;
+        script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com;
+        style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com;
+        img-src 'self' data: blob: https:;
         font-src 'self' data: https://cdnjs.cloudflare.com;
-        connect-src 'self' wss: ws: https: http:;
-        media-src 'self' data: blob:;
-        object-src 'none';
-        frame-src 'self';
-        worker-src 'self' blob:;
-        child-src 'self' blob:;
-        frame-ancestors 'self';
+        connect-src 'self' wss: ws:;
+        frame-ancestors 'none';
         base-uri 'self';
         form-action 'self';
-        upgrade-insecure-requests;      
-      
+        object-src 'none';
+        upgrade-insecure-requests;
       # Rate limiting
       traefik.http.middlewares.rate-limit.ratelimit.average: 100
-      traefik.http.middlewares.rate-limit.ratelimit.burst: 50
-      
+      traefik.http.middlewares.rate-limit.ratelimit.burst: 200
     networks:
       default: null
     platform: linux/amd64
@@ -202,21 +218,21 @@ services:
         target: /etc/nginx/conf.d/ssl
       - type: bind
         source: ./nginx-custom
-        target: /etc/nginx/conf.d/custom
-
+        target: /etc/nginx/conf.d/custom        
   proxy:
     command:
       - --providers.docker=true
       - --providers.docker.exposedbydefault=false
       - --providers.file.directory=/etc/traefik/dynamic
       - --providers.file.watch=true
-      - --entrypoints.web.address=:80
+      #- --entrypoints.web.address=:80
       - --entrypoints.web.http.redirections.entrypoint.to=websecure
       - --entrypoints.web.http.redirections.entrypoint.scheme=https
       - --entrypoints.websecure.address=:443
+      # Configuração global de TLS
       - --entrypoints.websecure.http.tls=true
       - --entrypoints.websecure.http.tls.options=default
-      - --providers.file.filename=/etc/traefik/traefik-tls.yml
+      - --providers.file.filename=/etc/traefik/traefik-tls.yml      
     image: traefik:v2.11
     networks:
       default: null
@@ -245,9 +261,7 @@ services:
         target: /etc/traefik/dynamic
       - type: bind
         source: ./traefik-tls.yml
-        target: /etc/traefik/traefik-tls.yml
-
-  # ... resto dos serviços permanecem iguais
+        target: /etc/traefik/traefik-tls.yml        
   queue-long:
     command:
       - bench
@@ -273,7 +287,6 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-
   queue-short:
     command:
       - bench
@@ -299,13 +312,11 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-
   redis-cache:
     image: redis:6.2-alpine
     networks:
       default: null
     restart: unless-stopped
-
   redis-queue:
     image: redis:6.2-alpine
     networks:
@@ -316,7 +327,6 @@ services:
         source: redis-queue-data
         target: /data
         volume: {}
-
   scheduler:
     command:
       - bench
@@ -340,7 +350,6 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-
   websocket:
     command:
       - node
@@ -349,6 +358,19 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
+    environment:
+      FRAPPE_SITE_NAME_HEADER: msi.arteris.com.br
+      SITE_NAME: msi.arteris.com.br
+      ALLOWED_ORIGINS: "https://msi.arteris.com.br"
+    # labels:
+    #   traefik.enable: "true"
+    #   traefik.http.services.websocket.loadbalancer.server.port: "9000"
+    #   traefik.http.routers.websocket.rule: Host(`msi.arteris.com.br`) && PathPrefix(`/socket.io/`)
+    #   traefik.http.routers.websocket.entrypoints: websecure
+    #   traefik.http.routers.websocket.tls: "true"      
+    #   traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Origin: "https://msi.arteris.com.br"
+    #   traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Host: "msi.arteris.com.br"
+    #   traefik.http.routers.websocket.middlewares: websocket-cors        
     image: arteris-msi:1.0.0
     networks:
       default: null
@@ -364,7 +386,6 @@ services:
         source: apps
         target: /home/frappe/frappe-bench/apps
         volume: {}
-
 networks:
   default:
     name: msi_default
@@ -377,7 +398,6 @@ volumes:
     name: msi_redis-queue-data
   sites:
     name: msi_sites
-
 x-backend-defaults:
   depends_on:
     configurator:
@@ -388,12 +408,10 @@ x-backend-defaults:
   volumes:
     - sites:/home/frappe/frappe-bench/sites
     - apps:/home/frappe/frappe-bench/apps
-
 x-customizable-image:
   image: arteris-msi:1.0.0
   pull_policy: if_not_present
   restart: unless-stopped
-
 x-depends-on-configurator:
   depends_on:
     configurator:
