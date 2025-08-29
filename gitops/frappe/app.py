@@ -99,10 +99,13 @@ def application(request: Request):
 	response = None
 
 	# Block GET /login
-	if ((request.method == "GET") and 
-		(not "redirect-to" in request.full_path) and 
-		(request.path == "/login") and 
-	    any(word in request.full_path for word in ['login', 'password', 'auth', 'credential'])):
+	if ((request.method == "GET" and not "redirect-to" in request.full_path) and 
+		(
+			(request.path == "/login") or
+            (request.path == "/api/auth") or
+            any(word in request.full_path for word in ['login', 'password', 'auth', 'credential'])
+        )
+    ):
 		return Response(status=403)
 
 	try:
