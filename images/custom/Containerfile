@@ -136,8 +136,9 @@ RUN bench init \
 # Switch to root to install Playwright browsers
 USER root
 
-# Create directory and install browsers
-RUN mkdir -p /home/frappe/frappe-bench/playwright-browsers && \
+# Install Playwright globally and then install browsers
+RUN pip3 install playwright && \
+    mkdir -p /home/frappe/frappe-bench/playwright-browsers && \
     chown frappe:frappe /home/frappe/frappe-bench/playwright-browsers && \
     export PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers && \
     python3 -m playwright install chromium --with-deps
