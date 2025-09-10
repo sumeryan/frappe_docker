@@ -109,7 +109,10 @@ RUN apt-get update \
     build-essential \
     libbz2-dev \
     # Additional packages that may be needed
-    python3-dev 
+    python3-dev \
+    # For Playwright browser installation
+    sudo \
+    && echo "frappe ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 
 USER frappe
 
@@ -131,13 +134,12 @@ RUN bench init \
     "playwright>=1.55.0" \
     "img2pdf==0.6.1" \
     "pillow==11.3.0" \
-    "beautifulsoup4>=4.12.0"
-  # Install Playwright browsers
-
-USER root
-
-ARG PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
-RUN python -m playwright install chromium --with-deps
+    "beautifulsoup4>=4.12.0" && \
+  # Install Playwright browsers as root user
+  sudo mkdir -p /home/frappe/frappe-bench/playwright-browsers && \
+  sudo chown frappe:frappe /home/frappe/frappe-bench/playwright-browsers && \
+  export PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers && \
+  sudo python -m playwright install chromium --with-deps
 
 FROM base AS backend
 
