@@ -125,8 +125,17 @@ RUN bench init \
     /home/frappe/frappe-bench && \
   cd /home/frappe/frappe-bench && \
   echo "{}" > sites/common_site_config.json && \
-  bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git
-
+  bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git && \
+  # Install additional Python packages
+  pip install \
+    "playwright>=1.55.0" \
+    "img2pdf==0.6.1" \
+    "pillow==11.3.0" \
+    "beautifulsoup4>=4.12.0" && \
+  # Install Playwright browsers
+  export PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers && \
+  python -m playwright install chromium --with-deps
+  
 FROM base AS backend
 
 USER frappe
