@@ -114,7 +114,7 @@ RUN apt-get update \
 USER frappe
 
 ARG FRAPPE_BRANCH=develop
-ARG FRAPPE_PATH=https://github.com/frappe/frappe
+ARG FRAPPE_PATH=https://github.com/sumeryan/frappe
 RUN bench init \
     --frappe-branch=${FRAPPE_BRANCH} \
     --frappe-path=${FRAPPE_PATH} \
@@ -131,11 +131,14 @@ RUN bench init \
     "playwright>=1.55.0" \
     "img2pdf==0.6.1" \
     "pillow==11.3.0" \
-    "beautifulsoup4>=4.12.0" && \
+    "beautifulsoup4>=4.12.0"
   # Install Playwright browsers
-  export PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers && \
-  python -m playwright install chromium --with-deps
-  
+
+USER root
+
+ARG PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
+RUN python -m playwright install chromium --with-deps
+
 FROM base AS backend
 
 USER frappe
