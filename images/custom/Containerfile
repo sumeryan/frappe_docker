@@ -140,7 +140,7 @@ USER root
 RUN mkdir -p /home/frappe/frappe-bench/playwright-browsers && \
     chown frappe:frappe /home/frappe/frappe-bench/playwright-browsers && \
     export PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers && \
-    /home/frappe/frappe-bench/env/bin/python -m playwright install chromium --with-deps
+    python3 -m playwright install chromium --with-deps
 
 # Switch back to frappe user
 USER frappe
