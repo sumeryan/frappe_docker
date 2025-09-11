@@ -113,9 +113,12 @@ RUN apt-get update \
 
 USER frappe
 
+# Ensure PATH includes the directory where bench was installed
+ENV PATH=/home/frappe/.local/bin:$PATH
+
 ARG FRAPPE_BRANCH=develop
 ARG FRAPPE_PATH=https://github.com/sumeryan/frappe
-RUN bench init \
+RUN /usr/local/bin/bench init \
     --frappe-branch=${FRAPPE_BRANCH} \
     --frappe-path=${FRAPPE_PATH} \
     --no-procfile \
@@ -125,7 +128,7 @@ RUN bench init \
     /home/frappe/frappe-bench && \
   cd /home/frappe/frappe-bench && \
   echo "{}" > sites/common_site_config.json && \
-  bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git && \
+  /usr/local/bin/bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git && \
   cd /home/frappe/frappe-bench && \
   source env/bin/activate && \
   pip install img2pdf && \
