@@ -68,11 +68,11 @@ services:
         bench set-config -g disable_signup 1;
         bench set-config -g login_with_email_link 0;
 
-        # CONFIGURAÇÃO CRÍTICA DO SOCKETIO
-        bench set-config -g socketio_default_port 9000;
-        bench --site smi.arteris.com.br set-config socketio_port 9000;
-        bench --site smi.arteris.com.br set-config allow_cors "*";
-        bench --site smi.arteris.com.br set-config cors_allowed_origins "https://smi.arteris.com.br";        
+        # # CONFIGURAÇÃO CRÍTICA DO SOCKETIO
+        # bench set-config -g socketio_default_port 9000;
+        # bench --site smi.arteris.com.br set-config socketio_port 9000;
+        # bench --site smi.arteris.com.br set-config allow_cors "*";
+        # bench --site smi.arteris.com.br set-config cors_allowed_origins "https://smi.arteris.com.br";        
 
     depends_on:
       db:
