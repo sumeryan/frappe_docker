@@ -127,6 +127,7 @@ RUN bench init \
     /home/frappe/frappe-bench
 
 USER frappe
+
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
 RUN cd /home/frappe/frappe-bench && \
     echo "{}" > sites/common_site_config.json && \
@@ -138,16 +139,33 @@ RUN cd /home/frappe/frappe-bench && \
     mkdir -p /home/frappe/frappe-bench/playwright-browsers
 
 USER frappe
+
 RUN cd /home/frappe/frappe-bench && \
     bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git
 
 # Switch to root to install Playwright browsers
 USER root
+
+RUN apt-get update && apt-get install -y \
+    libnss3 \
+    libnspr4 \
+    libatk-bridge2.0-0 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libxss1 \
+    libasound2
+
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
 RUN chown frappe:frappe /home/frappe/frappe-bench/playwright-browsers && \
     export PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers && \
     /home/frappe/frappe-bench/env/bin/python -m playwright install chromium --with-deps
 
+    # Instalar dependências do Playwright
+RUN npx playwright install-deps chromium
 
 USER frappe
 
