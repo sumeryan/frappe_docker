@@ -125,17 +125,19 @@ RUN /usr/local/bin/bench init \
     --no-backups \
     --skip-redis-config-generation \
     --verbose \
-    /home/frappe/frappe-bench && \
-  cd /home/frappe/frappe-bench && \
-  source env/bin/activate && \
-  pip install img2pdf && \
-  pip install pillow && \
-  pip install beautifulsoup4 && \
-  pip install playwright && \
-  mkdir -p /home/frappe/frappe-bench/playwright-browsers && \
-  echo "{}" > sites/common_site_config.json && \
-  /usr/local/bin/bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git && \
-  cd /home/frappe/frappe-bench
+    /home/frappe/frappe-bench
+
+ARG PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
+RUN cd /home/frappe/frappe-bench && \
+    source env/bin/activate && \
+    pip install img2pdf && \
+    pip install pillow && \
+    pip install beautifulsoup4 && \
+    pip install playwright && \
+    mkdir -p /home/frappe/frappe-bench/playwright-browsers && \
+    echo "{}" > sites/common_site_config.json && \
+    /usr/local/bin/bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git && \
+    cd /home/frappe/frappe-bench
 
 # Switch to root to install Playwright browsers
 USER root
