@@ -128,9 +128,9 @@ RUN bench init \
 
 USER frappe
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
-RUN /bin/bash cd /home/frappe/frappe-bench && \
+RUN cd /home/frappe/frappe-bench && \
     echo "{}" > sites/common_site_config.json && \
-    source env/bin/activate && \
+    . env/bin/activate && \
     pip install img2pdf && \
     pip install pillow && \
     pip install beautifulsoup4 && \
