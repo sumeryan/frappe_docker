@@ -124,13 +124,12 @@ RUN source destbench init \
     --no-backups \
     --skip-redis-config-generation \
     --verbose \
-    /home/frappe/frappe-bench && \
-  cd /home/frappe/frappe-bench && \
-  echo "{}" > sites/common_site_config.json
+    /home/frappe/frappe-bench
 
 USER frappe
 ENV PLAYWRIGHT_BROWSERS_PATH=/home/frappe/frappe-bench/playwright-browsers
 RUN cd /home/frappe/frappe-bench && \
+    echo "{}" > sites/common_site_config.json && \
     source env/bin/activate && \
     pip install img2pdf && \
     pip install pillow && \
