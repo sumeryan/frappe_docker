@@ -117,8 +117,7 @@ USER frappe
 ENV PATH=/home/frappe/.local/bin:$PATH
 ARG FRAPPE_BRANCH=develop
 ARG FRAPPE_PATH=https://github.com/sumeryan/frappe
-RUN cd /home/frappe/frappe-bench && \
-    source destbench init \
+RUN source destbench init \
     --frappe-branch=${FRAPPE_BRANCH} \
     --frappe-path=${FRAPPE_PATH} \
     --no-procfile \
