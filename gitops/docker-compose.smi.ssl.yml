@@ -167,6 +167,21 @@ services:
       # Middlewares completos
       traefik.http.routers.frontend-http.middlewares: complete-security@docker #,rate-limit@docker
       
+      # REDIRECIONAMENTO: msi.arteris.com.br → smi.arteris.com.br
+      traefik.http.routers.redirect-msi.entrypoints: websecure
+      traefik.http.routers.redirect-msi.rule: Host(`msi.arteris.com.br`)
+      traefik.http.routers.redirect-msi.tls: "true"
+      traefik.http.routers.redirect-msi.middlewares: redirect-to-smi@docker
+      traefik.http.routers.redirect-msi.service: redirect-service@docker
+
+      # Serviço fictício para o redirecionamento (necessário)
+      traefik.http.services.redirect-service.loadbalancer.server.port: "8080"
+
+      # Middleware de redirecionamento
+      traefik.http.middlewares.redirect-to-smi.redirectregex.regex: ^https://msi\.arteris\.com\.br/(.*)
+      traefik.http.middlewares.redirect-to-smi.redirectregex.replacement: https://smi.arteris.com.br/$${1}
+      traefik.http.middlewares.redirect-to-smi.redirectregex.permanent: "true"      
+
       # HEADERS DE SEGURANÇA COMPLETOS
       traefik.http.middlewares.complete-security.headers.customFrameOptionsValue: DENY
       traefik.http.middlewares.complete-security.headers.contentTypeNosniff: true
