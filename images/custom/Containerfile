@@ -145,6 +145,8 @@ USER frappe
 
 RUN cd /home/frappe/frappe-bench && \
     bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git
+RUN cd /home/frappe/frappe-bench && \
+    bench set-config -g server_script_enabled 1
 
 # Switch to root to install Playwright browsers
 USER root
