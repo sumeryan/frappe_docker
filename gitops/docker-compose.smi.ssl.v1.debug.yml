@@ -1,10 +1,10 @@
 name: smi
 services:
   backend:
-    depends_on:
-      configurator:
-        condition: service_completed_successfully
-        required: true
+    # depends_on:
+    #   configurator:
+    #     condition: service_completed_successfully
+    #     required: true
     image: arteris-smi:1.0.1
     networks:
       default: null
@@ -35,109 +35,109 @@ services:
       - type: bind
         source: ./backup
         target: /tmp/backup
-  configurator:
-    command:
-      - |
-        ls -1 apps > sites/apps.txt;
+  # configurator:
+  #   command:
+  #     - |
+  #       ls -1 apps > sites/apps.txt;
         
-        echo "" > /home/frappe/frappe-bench/apps/frappe/frappe/__init__.py
+  #       echo "" > /home/frappe/frappe-bench/apps/frappe/frappe/__init__.py
 
-        # Activate virtual environment first
-        source env/bin/activate
+  #       # Activate virtual environment first
+  #       source env/bin/activate
         
-        # Update package list and install required system packages
-        apt-get update && apt-get install -y wget curl sudo
+  #       # Update package list and install required system packages
+  #       apt-get update && apt-get install -y wget curl sudo
         
-        # Install ngrok properly
-        cd /tmp
-        wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
-        if [ -f ngrok-v3-stable-linux-amd64.tgz ]; then
-          tar xzf ngrok-v3-stable-linux-amd64.tgz
-          mv ngrok /usr/local/bin/
-          chmod +x /usr/local/bin/ngrok
-        fi
+  #       # Install ngrok properly
+  #       cd /tmp
+  #       wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+  #       if [ -f ngrok-v3-stable-linux-amd64.tgz ]; then
+  #         tar xzf ngrok-v3-stable-linux-amd64.tgz
+  #         mv ngrok /usr/local/bin/
+  #         chmod +x /usr/local/bin/ngrok
+  #       fi
         
-        # Install Python packages
-        pip install --no-cache-dir pyngrok debugpy
+  #       # Install Python packages
+  #       pip install --no-cache-dir pyngrok debugpy
         
-        # Configure ngrok
-        if [ -n "$NGROK_AUTHTOKEN" ]; then
-          ngrok config add-authtoken $NGROK_AUTHTOKEN
-        fi
+  #       # Configure ngrok
+  #       if [ -n "$NGROK_AUTHTOKEN" ]; then
+  #         ngrok config add-authtoken $NGROK_AUTHTOKEN
+  #       fi
 
-        # Return to frappe directory
-        cd /home/frappe/frappe-bench
+  #       # Return to frappe directory
+  #       cd /home/frappe/frappe-bench
 
-        # Database and Redis configurations
-        bench set-config -g db_host $DB_HOST; 
-        bench set-config -gp db_port $DB_PORT; 
-        bench set-config -g redis_cache "redis://$REDIS_CACHE"; 
-        bench set-config -g redis_queue "redis://$REDIS_QUEUE"; 
-        bench set-config -g redis_socketio "redis://$REDIS_QUEUE"; 
-        bench set-config -gp socketio_port $SOCKETIO_PORT;
+  #       # Database and Redis configurations
+  #       bench set-config -g db_host $DB_HOST; 
+  #       bench set-config -gp db_port $DB_PORT; 
+  #       bench set-config -g redis_cache "redis://$REDIS_CACHE"; 
+  #       bench set-config -g redis_queue "redis://$REDIS_QUEUE"; 
+  #       bench set-config -g redis_socketio "redis://$REDIS_QUEUE"; 
+  #       bench set-config -gp socketio_port $SOCKETIO_PORT;
         
-        # Security configurations
-        bench set-config -g secure_cookies 1;
-        bench set-config -g use_ssl 1;
-        bench set-config -g force_https 1;
-        bench set-config -g cookie_secure 1;
-        bench set-config -g session_cookie_secure 1;
-        bench set-config -g session_cookie_httponly 1;
-        bench set-config -g csrf_cookie_secure 1;
-        bench set-config -g csrf_cookie_httponly 1;
-        bench set-config -g session_cookie_samesite "Strict";
-        bench set-config -g csrf_cookie_samesite "Strict";
+  #       # Security configurations
+  #       bench set-config -g secure_cookies 1;
+  #       bench set-config -g use_ssl 1;
+  #       bench set-config -g force_https 1;
+  #       bench set-config -g cookie_secure 1;
+  #       bench set-config -g session_cookie_secure 1;
+  #       bench set-config -g session_cookie_httponly 1;
+  #       bench set-config -g csrf_cookie_secure 1;
+  #       bench set-config -g csrf_cookie_httponly 1;
+  #       bench set-config -g session_cookie_samesite "Strict";
+  #       bench set-config -g csrf_cookie_samesite "Strict";
         
-        # Development configurations
-        bench set-config -g developer_mode 1;
-        bench set-config -g server_script_enabled 1;
-        bench set-config -g hide_footer 0;
-        bench set-config -g disable_signup 0;
-        bench set-config -g login_with_email_link 0;
+  #       # Development configurations
+  #       bench set-config -g developer_mode 1;
+  #       bench set-config -g server_script_enabled 1;
+  #       bench set-config -g hide_footer 0;
+  #       bench set-config -g disable_signup 0;
+  #       bench set-config -g login_with_email_link 0;
 
-    depends_on:
-      db:
-        condition: service_healthy
-        required: true
-      redis-cache:
-        condition: service_started
-        required: true
-      redis-queue:
-        condition: service_started
-        required: true
-    entrypoint:
-      - bash
-      - -c
-    environment:
-      DB_HOST: db
-      DB_PORT: "3306"
-      DB_ROOT_PASSWORD: BtQEprm1Re5QDjY
-      REDIS_CACHE: redis-cache:6379
-      REDIS_QUEUE: redis-queue:6379
-      SOCKETIO_PORT: "9000"
-      NGROK_AUTHTOKEN: "${NGROK_TOKEN}"
-      DEBIAN_FRONTEND: noninteractive
-    image: arteris-smi:1.0.1
-    networks:
-      default: null
-    platform: linux/amd64
-    pull_policy: missing
-    restart: on-failure
-    volumes:
-      - type: volume
-        source: sites
-        target: /home/frappe/frappe-bench/sites
-        volume: {}
-      - type: volume
-        source: apps
-        target: /home/frappe/frappe-bench/apps
-        volume: {}
-      - type: bind
-        source: ./frappe/app.py
-        target: /tmp/custom-files/app.py
-      - type: bind
-        source: ./frappe/login.html
-        target: /tmp/custom-files/login.html
+  #   depends_on:
+  #     db:
+  #       condition: service_healthy
+  #       required: true
+  #     redis-cache:
+  #       condition: service_started
+  #       required: true
+  #     redis-queue:
+  #       condition: service_started
+  #       required: true
+  #   entrypoint:
+  #     - bash
+  #     - -c
+  #   environment:
+  #     DB_HOST: db
+  #     DB_PORT: "3306"
+  #     DB_ROOT_PASSWORD: BtQEprm1Re5QDjY
+  #     REDIS_CACHE: redis-cache:6379
+  #     REDIS_QUEUE: redis-queue:6379
+  #     SOCKETIO_PORT: "9000"
+  #     NGROK_AUTHTOKEN: "${NGROK_TOKEN}"
+  #     DEBIAN_FRONTEND: noninteractive
+  #   image: arteris-smi:1.0.1
+  #   networks:
+  #     default: null
+  #   platform: linux/amd64
+  #   pull_policy: missing
+  #   restart: on-failure
+  #   volumes:
+  #     - type: volume
+  #       source: sites
+  #       target: /home/frappe/frappe-bench/sites
+  #       volume: {}
+  #     - type: volume
+  #       source: apps
+  #       target: /home/frappe/frappe-bench/apps
+  #       volume: {}
+  #     - type: bind
+  #       source: ./frappe/app.py
+  #       target: /tmp/custom-files/app.py
+  #     - type: bind
+  #       source: ./frappe/login.html
+  #       target: /tmp/custom-files/login.html
   # Serviço para debug com ngrok
   debug-tunnel:
     image: ngrok/ngrok:3-alpine
@@ -309,10 +309,10 @@ services:
       - worker
       - --queue
       - long,default,short
-    depends_on:
-      configurator:
-        condition: service_completed_successfully
-        required: true
+    # depends_on:
+    #   configurator:
+    #     condition: service_completed_successfully
+    #     required: true
     image: arteris-smi:1.0.1
     networks:
       default: null
@@ -334,10 +334,10 @@ services:
       - worker
       - --queue
       - short,default
-    depends_on:
-      configurator:
-        condition: service_completed_successfully
-        required: true
+    # depends_on:
+    #   configurator:
+    #     condition: service_completed_successfully
+    #     required: true
     image: arteris-smi:1.0.1
     networks:
       default: null
@@ -395,10 +395,10 @@ services:
     command:
       - node
       - /home/frappe/frappe-bench/apps/frappe/socketio.js
-    depends_on:
-      configurator:
-        condition: service_completed_successfully
-        required: true
+    # depends_on:
+    #   configurator:
+    #     condition: service_completed_successfully
+    #     required: true
     environment:
       FRAPPE_SITE_NAME_HEADER: smi.arteris.com.br
       SITE_NAME: smi.arteris.com.br
@@ -492,9 +492,9 @@ volumes:
   sftp-ssh-keys: 
     name: smi_sftp-ssh-keys    
 x-backend-defaults:
-  depends_on:
-    configurator:
-      condition: service_completed_successfully
+  # depends_on:
+  #   configurator:
+  #     condition: service_completed_successfully
   image: arteris-smi:1.0.1
   pull_policy: if_not_present
   restart: unless-stopped
@@ -505,7 +505,7 @@ x-customizable-image:
   image: arteris-smi:1.0.1
   pull_policy: if_not_present
   restart: unless-stopped
-x-depends-on-configurator:
-  depends_on:
-    configurator:
-      condition: service_completed_successfully
+# x-depends-on-configurator:
+#   depends_on:
+#     configurator:
+#       condition: service_completed_successfully
