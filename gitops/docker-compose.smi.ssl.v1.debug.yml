@@ -39,8 +39,6 @@ services:
   #   command:
   #     - |
   #       ls -1 apps > sites/apps.txt;
-        
-  #       echo "" > /home/frappe/frappe-bench/apps/frappe/frappe/__init__.py
 
   #       # Activate virtual environment first
   #       source env/bin/activate
@@ -61,9 +59,7 @@ services:
   #       pip install --no-cache-dir pyngrok debugpy
         
   #       # Configure ngrok
-  #       if [ -n "$NGROK_AUTHTOKEN" ]; then
-  #         ngrok config add-authtoken $NGROK_AUTHTOKEN
-  #       fi
+  #       ngrok config add-authtoken $NGROK_AUTHTOKEN
 
   #       # Return to frappe directory
   #       cd /home/frappe/frappe-bench
