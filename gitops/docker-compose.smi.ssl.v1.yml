@@ -35,12 +35,6 @@ services:
         # cp -f /tmp/custom-files/app.py apps/frappe/frappe/app.py;
         # cp -f /tmp/custom-files/login.html apps/frappe/frappe/www/login.html;
         
-        # Criar site se necessário
-        # if [ ! -d "sites/smi.arteris.com.br" ]; then
-        #  bench new-site smi.arteris.com.br --db-root-password=$$DB_ROOT_PASSWORD --admin-password=admin --no-mariadb-socket
-        # fi
-        # echo "smi.arteris.com.br" > sites/currentsite.txt;
-        
         # Configurações básicas
         bench set-config -g db_host $$DB_HOST; 
         bench set-config -gp db_port $$DB_PORT; 
@@ -68,6 +62,15 @@ services:
         bench set-config -g disable_signup 1;
         bench set-config -g login_with_email_link 0;
 
+        # Criar site se necessário
+        if [ ! -d "sites/smi.arteris.com.br" ]; then
+          bench new-site smi.arteris.com.br --db-root-password=$$DB_ROOT_PASSWORD --admin-password=$$ADMIN_PASSWORD --no-mariadb-socket;
+        fi
+          echo "smi.arteris.com.br" > sites/currentsite.txt;        
+
+        bench use smi.arteris.com.br;
+        bench --site smi.arteris.com.br install-app arteris_app;
+
         # # CONFIGURAÇÃO CRÍTICA DO SOCKETIO
         # bench set-config -g socketio_default_port 9000;
         # bench --site smi.arteris.com.br set-config socketio_port 9000;
@@ -91,6 +94,7 @@ services:
       DB_HOST: db
       DB_PORT: "3306"
       DB_ROOT_PASSWORD: BtQEprm1Re5QDjY
+      ADMIN_PASSWORD: 9c3fcd45a332
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"

@@ -133,7 +133,7 @@ RUN . env/bin/activate && \
     pip install img2pdf && \
     pip install pillow && \
     pip install beautifulsoup4 && \
-    pip install playwright==1.55
+    pip install playwright==1.54
 
     RUN cd /home/frappe/frappe-bench && \
     bench get-app --branch develop https://github.com/sumeryan/frappe_arteris_app.git
