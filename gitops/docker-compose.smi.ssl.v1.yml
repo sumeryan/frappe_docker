@@ -426,7 +426,7 @@ services:
       com.arteris.service: "sftp"
       com.arteris.description: "Servidor SFTP para transferência segura de arquivos"
   playwright:
-    image: mcr.microsoft.com/playwright:v1.55.0-noble
+    image: mcr.microsoft.com/playwright:v1.54.0-noble
     container_name: smi-playwright
     restart: unless-stopped
     networks:
