@@ -40,6 +40,8 @@ services:
       - |
         ls -1 apps > sites/apps.txt;
         
+        echo "" > /home/frappe/frappe-bench/apps/frappe/frappe/__init__.py
+
         # Activate virtual environment first
         source env/bin/activate
         
