@@ -19,7 +19,7 @@ services:
       FRAPPE_DEBUG_REMOTE: "1"
       FRAPPE_DEBUG_PORT: "5678"
       FRAPPE_DEBUG_HOST: "0.0.0.0"
-      PYTHONPATH: "/home/frappe/frappe-bench/apps"    
+      PYTHONPATH: "/home/frappe/frappe-bench/apps"   
     volumes:
       - type: volume
         source: sites
@@ -50,6 +50,15 @@ services:
         # fi
         # echo "smi.arteris.com.br" > sites/currentsite.txt;
         
+        source env/bin/activate
+
+        # Instalar ngrok oficial
+        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+        tar xvzf ngrok-v3-stable-linux-amd64.tgz
+        sudo mv ngrok /usr/local/bin
+        pip install pyngrok debugpy
+        ngrok config add-authtoken $$NGROK_AUTHTOKEN
+
         # Configurações básicas
         bench set-config -g db_host $$DB_HOST; 
         bench set-config -gp db_port $$DB_PORT; 
@@ -103,6 +112,7 @@ services:
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
+      NGROK_AUTHTOKEN: "${NGROK_TOKEN}"
     image: arteris-smi:1.0.1
     networks:
       default: null
@@ -139,7 +149,10 @@ services:
       DEBUG_PORT: "5678"
     command: |
       sh -c "
-        export $(cat /tmp/.env | xargs) &&
+        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz &&
+        tar xvzf ngrok-v3-stable-linux-amd64.tgz &&
+        sudo mv ngrok /usr/local/bin && 
+        source env/bin/activate && 
         pip install pyngrok debugpy &&
         python -c \"
         import os
@@ -169,9 +182,6 @@ services:
       - type: bind
         source: ./debug-info
         target: /tmp
-      - type: bind
-        source: ./.env
-        target: /tmp/.env    
   db:
     command:
       - --character-set-server=utf8mb4
