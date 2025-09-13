@@ -421,6 +421,21 @@ services:
     labels:
       com.arteris.service: "sftp"
       com.arteris.description: "Servidor SFTP para transferência segura de arquivos"
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.55.0-noble
+    container_name: smi-playwright
+    restart: unless-stopped
+    networks:
+      default: null
+    extra_hosts:
+      - "hostmachine:host-gateway"
+    working_dir: /home/pwuser
+    user: pwuser
+    init: true
+    command: 
+      - /bin/sh
+      - -c
+      - "npx -y playwright@1.54.0 run-server --port 3000 --host 0.0.0.0"      
 networks:
   default:
     name: smi_default
