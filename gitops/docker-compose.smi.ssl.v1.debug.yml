@@ -372,10 +372,10 @@ services:
     command:
       - bench
       - schedule
-    depends_on:
-      configurator:
-        condition: service_completed_successfully
-        required: true
+    # depends_on:
+    #   configurator:
+    #     condition: service_completed_successfully
+    #     required: true
     image: arteris-smi:1.0.1
     networks:
       default: null
