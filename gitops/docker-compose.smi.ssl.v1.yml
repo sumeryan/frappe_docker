@@ -5,7 +5,7 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     networks:
       default: null
     platform: linux/amd64
@@ -80,7 +80,7 @@ services:
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     networks:
       default: null
     platform: linux/amd64
@@ -143,7 +143,7 @@ services:
       UPSTREAM_REAL_IP_HEADER: X-Forwarded-For
       UPSTREAM_REAL_IP_RECURSIVE: "off"
       NGINX_SERVER_TOKENS: "off"  # Ocultar versão do nginx
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     labels:
       traefik.enable: "true"
       traefik.http.routers.frontend-http.entrypoints: websecure
@@ -258,7 +258,7 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     networks:
       default: null
     platform: linux/amd64
@@ -283,7 +283,7 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     networks:
       default: null
     platform: linux/amd64
@@ -321,7 +321,7 @@ services:
       configurator:
         condition: service_completed_successfully
         required: true
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     networks:
       default: null
     platform: linux/amd64
@@ -348,7 +348,7 @@ services:
       FRAPPE_SITE_NAME_HEADER: smi.arteris.com.br
       SITE_NAME: smi.arteris.com.br
       ALLOWED_ORIGINS: "https://smi.arteris.com.br"  
-    image: arteris-smi:1.0.1
+    image: arteris-smi:1.0.0
     networks:
       default: null
     platform: linux/amd64
@@ -431,14 +431,14 @@ x-backend-defaults:
   depends_on:
     configurator:
       condition: service_completed_successfully
-  image: arteris-smi:1.0.1
+  image: arteris-smi:1.0.0
   pull_policy: if_not_present
   restart: unless-stopped
   volumes:
     - sites:/home/frappe/frappe-bench/sites
     - apps:/home/frappe/frappe-bench/apps
 x-customizable-image:
-  image: arteris-smi:1.0.1
+  image: arteris-smi:1.0.0
   pull_policy: if_not_present
   restart: unless-stopped
 x-depends-on-configurator:
