@@ -30,52 +30,56 @@ services:
     command:
       - |
         ls -1 apps > sites/apps.txt;
-        
-        # Copiar arquivos customizados
-        # cp -f /tmp/custom-files/app.py apps/frappe/frappe/app.py;
-        # cp -f /tmp/custom-files/login.html apps/frappe/frappe/www/login.html;
-        
+
         # Configurações básicas
+        echo "bench set-config -g db_host $$DB_HOST"; 
         bench set-config -g db_host $$DB_HOST; 
+        echo "bench set-config -gp db_port $$DB_PORT"; 
         bench set-config -gp db_port $$DB_PORT; 
+        echo "bench set-config -g redis_cache redis://$$REDIS_CACHE"; 
         bench set-config -g redis_cache "redis://$$REDIS_CACHE"; 
+        echo "bench set-config -g redis_queue redis://$$REDIS_QUEUE";
         bench set-config -g redis_queue "redis://$$REDIS_QUEUE"; 
+        echo "bench set-config -g redis_socketio redis://$$REDIS_QUEUE";
         bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"; 
+        echo "bench set-config -g socketio_port $$SOCKETIO_PORT";
         bench set-config -gp socketio_port $$SOCKETIO_PORT;
         
         # CONFIGURAÇÕES DE SEGURANÇA CRÍTICAS
+        echo "bench set-config -g secure_cookies 1";
         bench set-config -g secure_cookies 1;
+        echo "bench set-config -g use_ssl 1";
         bench set-config -g use_ssl 1;
+        echo "bench set-config -g force_https 1";
         bench set-config -g force_https 1;
+        echo "bench set-config -g cookie_secure 1";
         bench set-config -g cookie_secure 1;
+        echo "bench set-config -g session_cookie_secure 1"; 
         bench set-config -g session_cookie_secure 1;
+        echo "bench set-config -g session_cookie_httponly 1";
         bench set-config -g session_cookie_httponly 1;
+        echo "bench set-config -g csrf_cookie_secure 1";
         bench set-config -g csrf_cookie_secure 1;
+        echo "bench set-config -g csrf_cookie_httponly 1";
         bench set-config -g csrf_cookie_httponly 1;
+        echo "bench set-config -g session_cookie_samesite Strict";
         bench set-config -g session_cookie_samesite "Strict";
+        echo "bench set-config -g csrf_cookie_samesite Strict";
         bench set-config -g csrf_cookie_samesite "Strict";
         
         # Configurações anti-disclosure
+        echo "bench set-config -g developer_mode 0;";
         bench set-config -g developer_mode 0;
-        bench set-config -g server_script_enabled 0;
+        echo "bench set-config -g hide_version 1;";
+        bench set-config -g hide_version 1;
+        echo "bench set-config -g server_script_enabled 1;";
+        bench set-config -g server_script_enabled 1;
+        echo "bench set-config -g hide_footer 1;";
         bench set-config -g hide_footer 1;
+        echo "bench set-config -g disable_signup 1;";
         bench set-config -g disable_signup 1;
+        echo "bench set-config -g login_with_email_link 0;";
         bench set-config -g login_with_email_link 0;
-
-        # Criar site se necessário
-        if [ ! -d "sites/smi.arteris.com.br" ]; then
-          bench new-site smi.arteris.com.br --db-root-password=$$DB_ROOT_PASSWORD --admin-password=$$ADMIN_PASSWORD --no-mariadb-socket;
-        fi
-          echo "smi.arteris.com.br" > sites/currentsite.txt;        
-
-        bench use smi.arteris.com.br;
-        bench --site smi.arteris.com.br install-app arteris_app;
-
-        # # CONFIGURAÇÃO CRÍTICA DO SOCKETIO
-        # bench set-config -g socketio_default_port 9000;
-        # bench --site smi.arteris.com.br set-config socketio_port 9000;
-        # bench --site smi.arteris.com.br set-config allow_cors "*";
-        # bench --site smi.arteris.com.br set-config cors_allowed_origins "https://smi.arteris.com.br";        
 
     depends_on:
       db:
@@ -365,16 +369,7 @@ services:
     environment:
       FRAPPE_SITE_NAME_HEADER: smi.arteris.com.br
       SITE_NAME: smi.arteris.com.br
-      ALLOWED_ORIGINS: "https://smi.arteris.com.br"
-    # labels:
-    #   traefik.enable: "true"
-    #   traefik.http.services.websocket.loadbalancer.server.port: "9000"
-    #   traefik.http.routers.websocket.rule: Host(`smi.arteris.com.br`) && PathPrefix(`/socket.io/`)
-    #   traefik.http.routers.websocket.entrypoints: websecure
-    #   traefik.http.routers.websocket.tls: "true"      
-    #   traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Origin: "https://smi.arteris.com.br"
-    #   traefik.http.middlewares.websocket-cors.headers.customRequestHeaders.Host: "smi.arteris.com.br"
-    #   traefik.http.routers.websocket.middlewares: websocket-cors        
+      ALLOWED_ORIGINS: "https://smi.arteris.com.br"  
     image: arteris-smi:1.0.1
     networks:
       default: null
