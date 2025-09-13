@@ -147,6 +147,7 @@ services:
         target: /var/lib/mysql
         volume: {}
   frontend:
+    user: frappe
     command:
       - nginx-entrypoint.sh
     depends_on:
@@ -272,6 +273,7 @@ services:
         source: ./traefik-tls.yml
         target: /etc/traefik/traefik-tls.yml        
   queue-long:
+    user: frappe
     command:
       - bench
       - worker
@@ -297,6 +299,7 @@ services:
         target: /home/frappe/frappe-bench/apps
         volume: {}
   queue-short:
+    user: frappe
     command:
       - bench
       - worker
@@ -337,6 +340,7 @@ services:
         target: /data
         volume: {}
   scheduler:
+    user: frappe
     command:
       - bench
       - schedule
@@ -360,6 +364,7 @@ services:
         target: /home/frappe/frappe-bench/apps
         volume: {}
   websocket:
+    user: frappe
     command:
       - node
       - /home/frappe/frappe-bench/apps/frappe/socketio.js
