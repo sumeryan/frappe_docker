@@ -40,34 +40,41 @@ services:
       - |
         ls -1 apps > sites/apps.txt;
         
-        # Copiar arquivos customizados
-        # cp -f /tmp/custom-files/app.py apps/frappe/frappe/app.py;
-        # cp -f /tmp/custom-files/login.html apps/frappe/frappe/www/login.html;
-        
-        # Criar site se necessário
-        # if [ ! -d "sites/smi.arteris.com.br" ]; then
-        #  bench new-site smi.arteris.com.br --db-root-password=$$DB_ROOT_PASSWORD --admin-password=admin --no-mariadb-socket
-        # fi
-        # echo "smi.arteris.com.br" > sites/currentsite.txt;
-        
+        # Activate virtual environment first
         source env/bin/activate
-
-        # Instalar ngrok oficial
-        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
-        tar xvzf ngrok-v3-stable-linux-amd64.tgz
-        sudo mv ngrok /usr/local/bin
-        pip install pyngrok debugpy
-        ngrok config add-authtoken $$NGROK_AUTHTOKEN
-
-        # Configurações básicas
-        bench set-config -g db_host $$DB_HOST; 
-        bench set-config -gp db_port $$DB_PORT; 
-        bench set-config -g redis_cache "redis://$$REDIS_CACHE"; 
-        bench set-config -g redis_queue "redis://$$REDIS_QUEUE"; 
-        bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"; 
-        bench set-config -gp socketio_port $$SOCKETIO_PORT;
         
-        # CONFIGURAÇÕES DE SEGURANÇA CRÍTICAS
+        # Update package list and install required system packages
+        apt-get update && apt-get install -y wget curl sudo
+        
+        # Install ngrok properly
+        cd /tmp
+        wget -q https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+        if [ -f ngrok-v3-stable-linux-amd64.tgz ]; then
+          tar xzf ngrok-v3-stable-linux-amd64.tgz
+          mv ngrok /usr/local/bin/
+          chmod +x /usr/local/bin/ngrok
+        fi
+        
+        # Install Python packages
+        pip install --no-cache-dir pyngrok debugpy
+        
+        # Configure ngrok
+        if [ -n "$NGROK_AUTHTOKEN" ]; then
+          ngrok config add-authtoken $NGROK_AUTHTOKEN
+        fi
+
+        # Return to frappe directory
+        cd /home/frappe/frappe-bench
+
+        # Database and Redis configurations
+        bench set-config -g db_host $DB_HOST; 
+        bench set-config -gp db_port $DB_PORT; 
+        bench set-config -g redis_cache "redis://$REDIS_CACHE"; 
+        bench set-config -g redis_queue "redis://$REDIS_QUEUE"; 
+        bench set-config -g redis_socketio "redis://$REDIS_QUEUE"; 
+        bench set-config -gp socketio_port $SOCKETIO_PORT;
+        
+        # Security configurations
         bench set-config -g secure_cookies 1;
         bench set-config -g use_ssl 1;
         bench set-config -g force_https 1;
@@ -79,18 +86,12 @@ services:
         bench set-config -g session_cookie_samesite "Strict";
         bench set-config -g csrf_cookie_samesite "Strict";
         
-        # Configurações anti-disclosure
+        # Development configurations
         bench set-config -g developer_mode 1;
         bench set-config -g server_script_enabled 1;
         bench set-config -g hide_footer 0;
         bench set-config -g disable_signup 0;
         bench set-config -g login_with_email_link 0;
-
-        # # CONFIGURAÇÃO CRÍTICA DO SOCKETIO
-        # bench set-config -g socketio_default_port 9000;
-        # bench --site smi.arteris.com.br set-config socketio_port 9000;
-        # bench --site smi.arteris.com.br set-config allow_cors "*";
-        # bench --site smi.arteris.com.br set-config cors_allowed_origins "https://smi.arteris.com.br";        
 
     depends_on:
       db:
@@ -113,6 +114,7 @@ services:
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
       NGROK_AUTHTOKEN: "${NGROK_TOKEN}"
+      DEBIAN_FRONTEND: noninteractive
     image: arteris-smi:1.0.1
     networks:
       default: null
@@ -134,10 +136,9 @@ services:
       - type: bind
         source: ./frappe/login.html
         target: /tmp/custom-files/login.html
-
   # Serviço para debug com ngrok
   debug-tunnel:
-    image: arteris-smi:1.0.1
+    image: ngrok/ngrok:3-alpine
     container_name: smi-debug-tunnel
     networks:
       default: null
@@ -145,43 +146,14 @@ services:
       backend:
         condition: service_started
     environment:
-      NGROK_AUTHTOKEN: "${NGROK_TOKEN}"  # Defina no .env
-      DEBUG_PORT: "5678"
-    command: |
-      sh -c "
-        wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz &&
-        tar xvzf ngrok-v3-stable-linux-amd64.tgz &&
-        sudo mv ngrok /usr/local/bin && 
-        source env/bin/activate && 
-        pip install pyngrok debugpy &&
-        python -c \"
-        import os
-        from pyngrok import ngrok
-        
-        # Configura ngrok
-        ngrok.set_auth_token(os.getenv('NGROK_AUTHTOKEN'))
-        
-        # Cria túnel TCP para debug
-        tunnel = ngrok.connect(5678, 'tcp', bind_tls=False)
-        print(f'🔗 Debug Tunnel: {tunnel.public_url}')
-        
-        # Salva info do túnel
-        with open('/tmp/tunnel-info.txt', 'w') as f:
-            f.write(f'{tunnel.public_url}\\n')
-            
-        # Mantém o túnel ativo
-        import time
-        try:
-            while True:
-                time.sleep(60)
-        except KeyboardInterrupt:
-            ngrok.disconnect(tunnel.public_url)
-        \"
-      "
+      NGROK_AUTHTOKEN: "${NGROK_TOKEN}"
+    command: tcp --authtoken ${NGROK_TOKEN} backend:5678
+    restart: unless-stopped
     volumes:
       - type: bind
         source: ./debug-info
         target: /tmp
+
   db:
     command:
       - --character-set-server=utf8mb4
