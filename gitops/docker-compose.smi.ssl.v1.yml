@@ -27,6 +27,7 @@ services:
         source: ./backup
         target: /tmp/backup
   configurator:
+    user: frappe
     command:
       - |
         ls -1 apps > sites/apps.txt;
