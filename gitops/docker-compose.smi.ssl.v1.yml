@@ -27,60 +27,37 @@ services:
         source: ./backup
         target: /tmp/backup
   configurator:
-    user: frappe
     command:
       - |
         ls -1 apps > sites/apps.txt;
 
         # Configurações básicas
-        echo "bench set-config -g db_host $$DB_HOST"; 
         bench set-config -g db_host $$DB_HOST; 
-        echo "bench set-config -gp db_port $$DB_PORT"; 
         bench set-config -gp db_port $$DB_PORT; 
-        echo "bench set-config -g redis_cache redis://$$REDIS_CACHE"; 
         bench set-config -g redis_cache "redis://$$REDIS_CACHE"; 
-        echo "bench set-config -g redis_queue redis://$$REDIS_QUEUE";
         bench set-config -g redis_queue "redis://$$REDIS_QUEUE"; 
-        echo "bench set-config -g redis_socketio redis://$$REDIS_QUEUE";
         bench set-config -g redis_socketio "redis://$$REDIS_QUEUE"; 
-        echo "bench set-config -g socketio_port $$SOCKETIO_PORT";
         bench set-config -gp socketio_port $$SOCKETIO_PORT;
         
         # CONFIGURAÇÕES DE SEGURANÇA CRÍTICAS
-        echo "bench set-config -g secure_cookies 1";
         bench set-config -g secure_cookies 1;
-        echo "bench set-config -g use_ssl 1";
         bench set-config -g use_ssl 1;
-        echo "bench set-config -g force_https 1";
         bench set-config -g force_https 1;
-        echo "bench set-config -g cookie_secure 1";
         bench set-config -g cookie_secure 1;
-        echo "bench set-config -g session_cookie_secure 1"; 
         bench set-config -g session_cookie_secure 1;
-        echo "bench set-config -g session_cookie_httponly 1";
         bench set-config -g session_cookie_httponly 1;
-        echo "bench set-config -g csrf_cookie_secure 1";
         bench set-config -g csrf_cookie_secure 1;
-        echo "bench set-config -g csrf_cookie_httponly 1";
         bench set-config -g csrf_cookie_httponly 1;
-        echo "bench set-config -g session_cookie_samesite Strict";
         bench set-config -g session_cookie_samesite "Strict";
-        echo "bench set-config -g csrf_cookie_samesite Strict";
         bench set-config -g csrf_cookie_samesite "Strict";
         
         # Configurações anti-disclosure
-        echo "bench set-config -g developer_mode 0;";
         bench set-config -g developer_mode 0;
-        echo "bench set-config -g hide_version 1;";
         bench set-config -g hide_version 1;
-        echo "bench set-config -g server_script_enabled 1;";
         bench set-config -g server_script_enabled 1;
-        echo "bench set-config -g hide_footer 1;";
         bench set-config -g hide_footer 1;
-        echo "bench set-config -g disable_signup 1;";
         bench set-config -g disable_signup 1;
-        echo "bench set-config -g login_with_email_link 0;";
-        bench set-config -g login_with_email_link 0;
+        bench set-config -g login_with_email_link 0;        
 
     depends_on:
       db:
@@ -147,7 +124,6 @@ services:
         target: /var/lib/mysql
         volume: {}
   frontend:
-    user: frappe
     command:
       - nginx-entrypoint.sh
     depends_on:
@@ -273,7 +249,6 @@ services:
         source: ./traefik-tls.yml
         target: /etc/traefik/traefik-tls.yml        
   queue-long:
-    user: frappe
     command:
       - bench
       - worker
@@ -299,7 +274,6 @@ services:
         target: /home/frappe/frappe-bench/apps
         volume: {}
   queue-short:
-    user: frappe
     command:
       - bench
       - worker
@@ -340,7 +314,6 @@ services:
         target: /data
         volume: {}
   scheduler:
-    user: frappe
     command:
       - bench
       - schedule
@@ -364,7 +337,6 @@ services:
         target: /home/frappe/frappe-bench/apps
         volume: {}
   websocket:
-    user: frappe
     command:
       - node
       - /home/frappe/frappe-bench/apps/frappe/socketio.js
