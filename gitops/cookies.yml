@@ -1,9 +1,0 @@
-# ./traefik/cookies.yml
-http:
-  middlewares:
-    secure-cookies:
-      plugin:
-        cookie-flags:
-          httpOnly: true
-          secure: true
-          sameSite: "Strict"
