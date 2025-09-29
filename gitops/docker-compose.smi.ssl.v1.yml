@@ -75,8 +75,8 @@ services:
     environment:
       DB_HOST: db
       DB_PORT: "3306"
-      DB_ROOT_PASSWORD: BtQEprm1Re5QDjY
-      ADMIN_PASSWORD: 9c3fcd45a332
+      DB_ROOT_PASSWORD: dvIf6BQfbnzn0mC
+      ADMIN_PASSWORD: itUN5rLQwhSrMNT
       REDIS_CACHE: redis-cache:6379
       REDIS_QUEUE: redis-queue:6379
       SOCKETIO_PORT: "9000"
@@ -385,7 +385,7 @@ services:
         target: /etc/ssh/keys
         volume: {}
     environment:
-      SFTP_USERS: "arteris:${SFTP_PASSWORD:-Art3r1s@2024}:1001:1001:upload"
+      SFTP_USERS: "arteris:${SFTP_PASSWORD:-0H2W35yez4nEiXH}:1001:1001:upload"
       SFTP_ENABLE_PASSWORD_AUTH: "true"
       SFTP_ENABLE_ROOT_LOGIN: "false"
       SFTP_LOG_LEVEL: "VERBOSE"
